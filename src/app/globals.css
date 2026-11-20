@@ -1,1 +1,13 @@
 @import "tailwindcss";
+
+/* Palette agreed in docs/specs/02-design.md §4 "Visual style". */
+@theme {
+  --color-navy-950: #161f4b;
+  --color-navy-900: #1e2a5e;
+  --color-navy-800: #2a3a78;
+  --color-steel-400: #6c88b8;
+  --color-cream-300: #f4d9a4;
+  --color-ink-200: #e4e7ec;
+  --color-ink-400: #98a2b3;
+  --color-ink-500: #667085;
+}
