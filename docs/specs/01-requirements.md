@@ -76,3 +76,107 @@ shared password `password123` are the ones in brief §7.2:
 - Login by IC number — email only (interview A1)
 - Return-to-original-page after login — always land on the role's home page (interview A5)
 - The leave request screens themselves — separate spec
+
+---
+
+# Leave Requests – Requirements
+
+> **This file answers:** What should the leave request module do, and how do
+> I check it?
+> **Who:** The AI drafted it from the brief and the interview answers
+> **L1–L8** (20/11/26). You review it.
+>
+> When the app's behaviour needs to change, update this file **first**.
+>
+> Scope of this section: **the leave request flow** (brief §5, FR-02 … FR-09).
+> Login and access control stay as agreed in the section above — untouched.
+> IDs continue from there: stories **U11+**, checks **AC-10+**. Where the
+> brief left something open (§7.2 "the exact fields are decided in the
+> specifications"), the interview answers settle it, quoted as L1–L8:
+> L1 employees only submit · L2 calendar-date rules · L3 no balances ·
+> L4 write-once requests · L5 rejections final · L6 overlaps allowed ·
+> L7 role lists and sorting · L8 text rules.
+
+## 1. The problem
+
+Budiman Company's leave process is paper: fill a form, hand it to the
+supervisor, HR retypes it into a spreadsheet. Forms get lost, employees
+cannot see where their request is, and HR has no single waiting list
+(brief §2). This section turns that paper flow into records:
+
+1. The employee's paper form becomes one screen — the request is in the
+   system from the moment it is submitted (goal 1).
+2. Each role gets exactly the list they must act on, nothing else (goal 2).
+3. Every step — submit, sign, send, decide — is stored with who and when,
+   so nothing gets lost (goal 3).
+
+## 2. Who uses it (roles)
+
+| Role | What they do with requests |
+|------|----------------------------|
+| **Employee** | The only role that submits a request (L1, brief §5.3 rule 2). Submits, tracks its status, sends a signed request to HR |
+| **Supervisor** | Signs or rejects requests where they are the named supervisor; a rejection needs a remark. Never submits |
+| **HR** | Approves or rejects the requests in the shared queue; a rejection needs a remark; the officer who decides is recorded. Never submits |
+| **Admin** | Sees every record, changes nothing (FR-08) |
+
+## 3. User stories
+
+- **U11. Submit a request** *(High)*. As an employee, I fill in one form — leave type, start and end date, and a supervisor **chosen from my own division** — and submit, so my paper form becomes a record that exists from that moment. The supervisor dropdown lists only SUPERVISOR users of my division (server re-checks it too). (FR-02, L1)
+  *Try by hand:* sign in as `employee-1@budiman.com`, open **New request** — the supervisor picker shows only Supervisor 1 and Supervisor 2 (Finance). Submit Annual leave, 1 Dec–5 Dec.
+- **U12. "Other" must explain itself** *(High)*. As an employee, when I pick leave type **Other** I must describe it (3–100 characters); the description box appears only for Other. (§7.2, L8)
+  *Try by hand:* pick Other, submit with a blank description → blocked, my values are kept; type "Moving house" → submits.
+- **U13. Dates behave** *(High)*. As an employee, the end date cannot be before the start date, one-day leave (start = end) is fine, past dates are allowed, and the form shows the number of leave days automatically — calendar days, counted inclusively, no weekend or holiday calendar. (L2)
+  *Try by hand:* enter start 9 Dec, end 5 Dec → blocked with a plain message; 1 Dec–5 Dec → the form says **5 days**; 4 Dec–4 Dec → **1 day**.
+- **U14. The supervisor decides** *(High)*. As a supervisor, I sign a request sent to me or reject it **with a remark** (3–500 characters, required — no way to reject without a reason). The employee sees my remark. (FR-03)
+  *Try by hand:* as `supervisor-1@budiman.com`, open a Pending supervisor request, Reject with a blank remark → blocked; reject with "Team busy that week" → the employee now sees Rejected by supervisor and that exact remark.
+- **U15. The employee sends it on** *(High)*. As an employee, once my request is **Signed** I send it to the shared HR queue. The **Send to HR** button appears only on my Signed requests — on the request's detail page; action buttons live only there. (FR-04)
+  *Try by hand:* have the supervisor sign one request; it appears under "To act on" on `/employee`; open it → **Send to HR**; press it → Pending HR and it has left "To act on".
+- **U16. HR decides and is on record** *(High)*. As an HR officer, I approve or reject any request in the queue — either officer can act — and a rejection needs a remark (3–500). The system records **which officer decided** and when. (FR-05, §5.3 rule 5)
+  *Try by hand:* sign in as `hr-2@budiman.com` (not the officer who handled the last one), approve a queued request; open the request and it shows **Approved — HR 2** with the date.
+- **U17. Everyone sees the right list** *(High)*. Each role's home page shows **To act on** and **History**, with status and remarks: employee → own requests; supervisor → only requests naming them; HR → the shared queue plus what passed through HR; queues are **oldest submitted first**, history **newest first**; no pagination at demo size. (FR-06, L7)
+  *Try by hand:* with one request sitting Pending supervisor for Supervisor 1, `/supervisor` for Supervisor 2 shows an empty queue; both HR accounts see the same queue once it is sent.
+- **U18. Confirm, then celebrate** *(High)*. Every action — submit, sign, supervisor reject, send to HR, HR approve, HR reject — asks **Are you sure?** first and shows a **success message** afterwards. (FR-07)
+  *Try by hand:* click Reject, cancel the confirmation → the request is untouched and shows no success message; confirm → banner "Request rejected" and the new status.
+- **U19. Requests are write-once** *(High)*. Nobody edits or cancels a submitted request, nobody undoes a decision, and a rejection is final — trying again means a brand-new request. There is no Edit, Delete, Reopen or Undo button anywhere in the module, in any status. (L4, L5)
+  *Try by hand:* open a request in each of the six statuses and hunt for an Edit/Delete/Reopen control — there is none; re-approve an Approved request's URL → the server refuses.
+- **U20. My lane, enforced twice** *(High)*. The menu is decoration; the server is the gate: a supervisor cannot open or act on another supervisor's request, an employee cannot touch someone else's request, and non-employees cannot submit — even by typing URLs or forging action calls. (§5.3, §7.5)
+  *Try by hand:* signed in as Supervisor 2, type the URL of Supervisor 1's request detail → bounced to `/supervisor` with the not-authorized banner, no content shown.
+- **U21. The server checks everything** *(High)*. Every field rule (required text, lengths, dates, status transitions) is enforced again on the server, never trusted from the browser; remarks and descriptions are stored and displayed as plain text. (FR-10, L8, §7.5)
+  *Try by hand:* with devtools, submit a forged request with end before start, or a rejection with a blank remark, or `<script>alert(1)</script>` as a remark → the first two are refused; the third shows as literal text, never runs.
+- **U22. The admin sees it all** *(Medium)*. As the admin, I see **every** leave record — including requests a supervisor rejected that HR never saw — with status, remarks and dates, and **no buttons at all**. (FR-08)
+  *Try by hand:* sign in as `admin@budiman.com` after a supervisor rejection; the record is in the table, the page has zero action controls.
+- **U23. Nice ideas queue up** *(Low)*. As the team, any idea not in this spec (balances, email notifications, export, paging…) is written into a spec **before** it is built — nothing is built on a whim. (FR-09)
+  *Try by hand:* process rule, nothing to click.
+
+## 4. Acceptance checklist
+
+| Status | ID | Check | How to test |
+|--------|----|-------|-------------|
+| To do | AC-10 | An employee submits; the supervisor picker offers only SUPERVISOR users of their own division (U11) | • As `employee-1@` (Finance) open New request<br>• Dropdown lists exactly Supervisor 1 and Supervisor 2<br>• Submit Annual leave 1 Dec–5 Dec → appears on `/employee` as Pending supervisor |
+| To do | AC-11 | Other requires a 3–100 char description; the field only shows for Other (U12) | • Choose Other, blank description → blocked, value kept<br>• "Moving house" → submits<br>• Switch back to Annual leave → description box hidden and not required |
+| To do | AC-12 | End ≥ start, same day = 1 day, day count shown inclusive of calendar days (U13) | • Start 9 Dec / end 5 Dec → refused with a message<br>• 1–5 Dec → "5 days" shown live<br>• 4–4 Dec → "1 day" |
+| To do | AC-13 | Sign sets status Signed with a success message and a signed date (U14, U18) | • As Supervisor 1, Sign a queued request → banner + status Signed, signed date visible |
+| To do | AC-14 | Supervisor rejection requires a 3–500 char remark; the employee sees it; the status is final (U14, U19) | • Reject with blank → blocked<br>• "Team busy" → Rejected by supervisor; employee's History shows that remark<br>• No path to reverse it |
+| To do | AC-15 | Send to HR only from Signed, by the owning employee; lands in the HR queue (U15) | • Open a Signed request from "To act on" → **Send to HR** on its detail page; press → Pending HR<br>• Open requests in every other status (Pending supervisor, Approved…) → no button |
+| To do | AC-16 | HR approves or rejects; rejection needs a remark; the deciding officer is recorded; either officer can act (U16) | • `hr-1@` rejects blank → blocked; rejects with remark → Rejected by HR, "HR 1" recorded<br>• `hr-2@` approves another → Approved, "HR 2" recorded |
+| To do | AC-17 | Supervisor queue = only requests naming them, oldest first; history newest first (U17) | • Two requests, one for each supervisor → each queue shows exactly its own, oldest at top<br>• Supervisor 2's list stays empty while Supervisor 1 works |
+| To do | AC-18 | HR queue shared by both officers, oldest first; HR history = Approved / Rejected by HR only; supervisor rejections hidden from HR (U16, U17) | • Both HR accounts see the same queue<br>• After decisions, history lists them newest first<br>• A supervisor-rejected request is nowhere in HR's pages |
+| To do | AC-19 | Employee sees only their own requests; To act on = their Signed ones only (U17) | • Hand a request to another user by hand: `UPDATE LeaveRequest SET employeeId=<another user id>` in SQLite → the row vanishes from `/employee` (role scoping means it appears in no one's list but the admin's)<br>• Restore the old value → the row is back<br>• "To act on" lists exactly the Signed requests awaiting send |
+| To do | AC-20 | Every action confirms first, succeeds with a message; cancelling the confirm changes nothing (U18) | • For each of the six action buttons (submit, sign, supervisor reject, send to HR, HR approve, HR reject): open it, cancel the confirm → status unchanged, no success banner<br>• Repeat, confirm → success banner shown |
+| To do | AC-21 | No edit / cancel / undo / reopen in any status; decisions and rejections are final (U19) | • Walk all six statuses — no such button anywhere<br>• Re-send an Approved request's action URL → refused |
+| To do | AC-22 | Cross-role access and forged action calls are refused server-side (U20) | • Supervisor 2 opens Supervisor 1's request URL → bounced, not-authorized banner<br>• Employee posts a forged HR approve → refused<br>• Supervisor posts to the submit action → refused |
+| To do | AC-23 | Server-side field rules hold; remarks render as plain text (U21) | • Forge a POST with end < start / blank remark → refused<br>• Remark `<script>alert(1)</script>` renders as literal text |
+| To do | AC-24 | Admin table lists every record, including supervisor rejections, read-only (U22) | • After a supervisor rejection, `admin@` sees that row<br>• Zero action buttons; typed action URLs refuse |
+
+## 5. Not included (for now)
+
+- Leave balances and entitlements — approvers are the human control; the
+  stored data allows adding balance reports later without migration (L3)
+- Weekend / public-holiday calendars — days are plain inclusive calendar
+  days (L2)
+- Editing, cancelling, undoing, reopening — excluded by design (L4, L5, U19)
+- Overlap or duplicate blocking — approvers spot duplicates and reject
+  with a remark (L6)
+- Supervisors and HR submitting their own leave — employees only (L1)
+- Anything not in this section (notifications, attachments, export,
+  pagination, filters) — FR-09 / U23: spec first, then build
