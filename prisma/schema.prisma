@@ -1,0 +1,32 @@
+// Budiman HRMS – Leave Request module
+// Schema is filled in task by task, following docs/specs/02-design.md.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// One role per user (brief §7.2).
+enum Role {
+  EMPLOYEE
+  SUPERVISOR
+  HR
+  ADMIN
+}
+
+// One row per person who can log in (design §1).
+model User {
+  id          Int      @id @default(autoincrement())
+  name        String
+  icNo        String   @unique // format xx-xxxxxx
+  email       String   @unique // lowercased, @budiman.com, the login id
+  password    String   // bcrypt hash only
+  role        Role
+  division    String
+  designation String
+  createdAt   DateTime @default(now())
+}
