@@ -175,20 +175,20 @@ whole module including it.
 
 | Status | # | Task | Priority | Checks (from requirements §4, leave section) |
 |--------|---|------|----------|----------------------------------------------|
-| To do | 9 | Leave request table | High | — (enables AC-10…AC-16) |
-| To do | 10 | Leave rules library | High | AC-21, AC-23 (library half) |
-| To do | 11 | Request form + submit action | High | AC-10, AC-11, AC-12 |
-| To do | 12 | Request detail page (read-only, gated) | High | AC-21 (button hunt), AC-22 (page half) |
-| To do | 13 | Employee home + Send to HR | High | AC-15, AC-19, AC-20 (first action) |
-| To do | 14 | Supervisor home + Sign / Reject | High | AC-13, AC-14, AC-17 |
-| To do | 15 | HR queue + Approve / Reject + officer recorded | High | AC-16, AC-18 |
-| To do | 16 | Admin: every record, read-only | Medium | AC-24 |
-| To do | 17 | Tampering and cross-role pass | High | AC-22, AC-23 |
-| To do | 18 | Full acceptance run against the leave requirements | High | AC-10…AC-24 |
+| Done | 9 | Leave request table | High | — (enables AC-10…AC-16) |
+| Done | 10 | Leave rules library | High | AC-21, AC-23 (library half) |
+| Done | 11 | Request form + submit action | High | AC-10, AC-11, AC-12 |
+| Done | 12 | Request detail page (read-only, gated) | High | AC-21 (button hunt), AC-22 (page half) |
+| Done | 13 | Employee home + Send to HR | High | AC-15, AC-19, AC-20 (first action) |
+| Done | 14 | Supervisor home + Sign / Reject | High | AC-13, AC-14, AC-17 |
+| Done | 15 | HR queue + Approve / Reject + officer recorded | High | AC-16, AC-18 |
+| Done | 16 | Admin: every record, read-only | Medium | AC-24 |
+| Done | 17 | Tampering and cross-role pass | High | AC-22, AC-23 |
+| Done | 18 | Full acceptance run against the leave requirements | High | AC-10…AC-24 |
 
 ---
 
-## Task 9 – Leave request table *(High)* — **To do**
+## Task 9 – Leave request table *(High)* — **Done**
 
 > Database first, as with login Task 1: the wiring of the new table only,
 > no screens yet.
@@ -205,7 +205,7 @@ whole module including it.
 - **Trace:** design §1, §5; brief §7.2 (Leave requests, Leave types,
   §5.2 statuses); requirements U11.
 
-## Task 10 – Leave rules library *(High)* — **To do**
+## Task 10 – Leave rules library *(High)* — **Done**
 
 > One auditable place for the rules, tested before any UI can get them
 > wrong (same pattern as login Task 4).
@@ -223,7 +223,7 @@ whole module including it.
 - **Trace:** design LR-3, LR-5, LR-6, LR-8, LR-9, §5; requirements U13,
   U19, U21 (library side of AC-21/AC-23).
 
-## Task 11 – Request form + submit action *(High)* — **To do**
+## Task 11 – Request form + submit action *(High)* — **Done**
 
 - **Goal:** An employee fills the form (type — Other reveals the
   description box —, dates with live "N days", division supervisor
@@ -244,7 +244,7 @@ whole module including it.
 - **Trace:** requirements U11, U12, U13, U21, AC-10/11/12; design §1,
   LR-1, LR-2, LR-5, LR-6, LR-10, §4, §5.
 
-## Task 12 – Request detail page (read-only, gated) *(High)* — **To do**
+## Task 12 – Request detail page (read-only, gated) *(High)* — **Done**
 
 > Shared by all four roles, and the **only** screen that will ever hold
 > action buttons — so it is built and gated before any action exists.
@@ -267,7 +267,7 @@ whole module including it.
 - **Trace:** requirements U19, U20, AC-21/22; design LR-3, LR-4, LR-8,
   LR-10, §4 (rows link here; only actions live here), §5, §6 bullets 2–3.
 
-## Task 13 – Employee home + Send to HR *(High)* — **To do**
+## Task 13 – Employee home + Send to HR *(High)* — **Done**
 
 - **Goal:** The placeholder `/employee` becomes the real page: New request
   button, *To act on* = own Signed requests (oldest first), *History* =
@@ -292,7 +292,7 @@ whole module including it.
 - **Trace:** requirements U15, U17, U18, AC-15/19/20; design LR-3, LR-4,
   LR-8, LR-9, LR-10, §4, §5.
 
-## Task 14 – Supervisor home + Sign / Reject *(High)* — **To do**
+## Task 14 – Supervisor home + Sign / Reject *(High)* — **Done**
 
 - **Goal:** `/supervisor` lists the queue and history for requests naming
   the signed-in supervisor; the detail page now offers Sign and
@@ -311,7 +311,7 @@ whole module including it.
 - **Trace:** requirements U14, U17, U18, U19, AC-13/14/17/20; design
   LR-3, LR-4, LR-5, LR-9, LR-10, §4, §5.
 
-## Task 15 – HR queue + Approve / Reject + officer recorded *(High)* — **To do**
+## Task 15 – HR queue + Approve / Reject + officer recorded *(High)* — **Done**
 
 - **Goal:** `/hr` shows the shared queue and HR history; the detail page
   offers Approve and Reject(remark) to any HR officer at Pending HR; the
@@ -328,7 +328,7 @@ whole module including it.
 - **Trace:** requirements U16, U17, AC-16/18; design LR-3, LR-4, LR-5,
   LR-8, LR-9, LR-10, §4, §5.
 
-## Task 16 – Admin: every record, read-only *(Medium)* — **To do**
+## Task 16 – Admin: every record, read-only *(Medium)* — **Done**
 
 - **Goal:** `/admin` lists every leave record — including supervisor
   rejections HR never saw — with no way to change anything (FR-08).
@@ -342,7 +342,7 @@ whole module including it.
   module.
 - **Trace:** requirements U22, AC-24; design LR-8, §4, §5; brief FR-08.
 
-## Task 17 – Tampering and cross-role pass *(High)* — **To do**
+## Task 17 – Tampering and cross-role pass *(High)* — **Done**
 
 - **Goal:** The security claims (§6 of the design, FR-10/§7.5) are proven
   by breaking attempts, not assumed.
@@ -358,7 +358,7 @@ whole module including it.
 - **Trace:** requirements U20, U21, AC-22/23; design LR-1…LR-6, §6;
   brief §7.5 / OWASP A01, A03, A05.
 
-## Task 18 – Full acceptance run against the leave requirements *(High)* — **To do**
+## Task 18 – Full acceptance run against the leave requirements *(High)* — **Done**
 
 - **Goal:** The module is verified as a whole, in the order the brief's
   flow happens, and left clean.

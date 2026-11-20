@@ -29,4 +29,54 @@ model User {
   division    String
   designation String
   createdAt   DateTime @default(now())
+
+  submitted    LeaveRequest[] @relation("LeaveRequests")
+  supervising  LeaveRequest[] @relation("SupervisedRequests")
+  hrDecisions  LeaveRequest[] @relation("HrDecisions")
+}
+
+// The choices on the leave form (brief §7.2 "Leave types").
+enum LeaveType {
+  ANNUAL
+  MATERNITY
+  UNPAID
+  COMPASSIONATE
+  OTHER
+}
+
+// Exactly the six statuses of brief §5.2 — no seventh exists (LR-3).
+enum LeaveRequestStatus {
+  PENDING_SUPERVISOR
+  SIGNED
+  PENDING_HR
+  APPROVED
+  REJECTED_BY_SUPERVISOR
+  REJECTED_BY_HR
+}
+
+// One leave request record (design §1 "LeaveRequest").
+// Days are derived at render (LR-6), never stored.
+model LeaveRequest {
+  id               Int                @id @default(autoincrement())
+  employeeId       Int
+  supervisorId     Int
+  leaveType        LeaveType
+  otherTypeText    String? // required when OTHER (LR-5)
+  startDate        DateTime
+  endDate          DateTime // >= startDate, same day allowed (LR-6)
+  status           LeaveRequestStatus @default(PENDING_SUPERVISOR)
+  supervisorRemark String? // required on supervisor rejection (LR-5)
+  hrOfficerId      Int? // stamped by the server at the HR decision (LR-4)
+  hrRemark         String? // required on HR rejection (LR-5)
+  submittedAt      DateTime           @default(now())
+  signedAt         DateTime?
+  decidedAt        DateTime?
+
+  employee   User  @relation("LeaveRequests", fields: [employeeId], references: [id])
+  supervisor User  @relation("SupervisedRequests", fields: [supervisorId], references: [id])
+  hrOfficer  User? @relation("HrDecisions", fields: [hrOfficerId], references: [id])
+
+  @@index([supervisorId, status])
+  @@index([employeeId, submittedAt])
+  @@index([status])
 }
