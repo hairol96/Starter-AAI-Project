@@ -13,15 +13,45 @@ type User = {
   role: string;
 };
 
+// Design §4 (leave): the success-notice map. ?notice=... carries one
+// key per action; unknown keys show nothing.
+const NOTICES: Record<string, { text: string; className: string }> = {
+  "not-authorized": {
+    text: "You are not authorized to open that page.",
+    className: "bg-yellow-50 text-yellow-800",
+  },
+  "request-submitted": {
+    text: "Leave request submitted.",
+    className: "bg-green-50 text-green-800",
+  },
+  "request-signed": {
+    text: "Leave request signed.",
+    className: "bg-green-50 text-green-800",
+  },
+  "request-rejected": {
+    text: "Leave request rejected.",
+    className: "bg-green-50 text-green-800",
+  },
+  "request-sent": {
+    text: "Leave request sent to HR.",
+    className: "bg-green-50 text-green-800",
+  },
+  "request-approved": {
+    text: "Leave request approved.",
+    className: "bg-green-50 text-green-800",
+  },
+};
+
 function Notice() {
   const searchParams = useSearchParams();
-  if (searchParams.get("notice") !== "not-authorized") return null;
+  const notice = NOTICES[searchParams.get("notice") ?? ""];
+  if (!notice) return null;
   return (
     <p
-      role="alert"
-      className="mb-6 rounded-xl bg-yellow-50 px-4 py-3 text-sm text-yellow-800"
+      role="status"
+      className={`mb-6 rounded-xl px-4 py-3 text-sm ${notice.className}`}
     >
-      You are not authorized to open that page.
+      {notice.text}
     </p>
   );
 }

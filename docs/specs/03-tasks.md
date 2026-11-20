@@ -150,3 +150,231 @@ Medium story U9.
 **After each task:** the AI reports what passed, waits for your OK, then
 commits with a Conventional Commit message (`feat: …`) — one commit per
 finished task, only when you say go.
+
+---
+
+# Leave Requests – Tasks
+
+> **This file answers:** In what order do we build the leave module, and
+> how do we check each step?
+> **Who:** The AI drafts it. You review it.
+>
+> Build one task at a time, in order. When a task is done, the AI changes
+> its Status to Done. At the end, you check the whole flow against the
+> specs. If something is wrong, fix the spec first, then ask the AI to
+> rebuild.
+>
+> Specs: the Leave Requests sections of `01-requirements.md` (U11–U23,
+> AC-10…AC-24) and `02-design.md` (LR-* rules, §numbers).
+
+**Priority.** FR-02 … FR-07 and FR-10 are High in the brief → the build
+tasks and the two verification tasks are High. FR-08 (admin table) is the
+only Medium; it is built after the High flow it reports on (nothing can
+be High-checked without the flow), and the two final High tasks walk the
+whole module including it.
+
+| Status | # | Task | Priority | Checks (from requirements §4, leave section) |
+|--------|---|------|----------|----------------------------------------------|
+| Done | 9 | Leave request table | High | — (enables AC-10…AC-16) |
+| Done | 10 | Leave rules library | High | AC-21, AC-23 (library half) |
+| Done | 11 | Request form + submit action | High | AC-10, AC-11, AC-12 |
+| Done | 12 | Request detail page (read-only, gated) | High | AC-21 (button hunt), AC-22 (page half) |
+| Done | 13 | Employee home + Send to HR | High | AC-15, AC-19, AC-20 (first action) |
+| Done | 14 | Supervisor home + Sign / Reject | High | AC-13, AC-14, AC-17 |
+| Done | 15 | HR queue + Approve / Reject + officer recorded | High | AC-16, AC-18 |
+| Done | 16 | Admin: every record, read-only | Medium | AC-24 |
+| Done | 17 | Tampering and cross-role pass | High | AC-22, AC-23 |
+| Done | 18 | Full acceptance run against the leave requirements | High | AC-10…AC-24 |
+
+---
+
+## Task 9 – Leave request table *(High)* — **Done**
+
+> Database first, as with login Task 1: the wiring of the new table only,
+> no screens yet.
+
+- **Goal:** The `LeaveRequest` table from design §1 exists in the real
+  SQLite file, with the two enums and the three indexes.
+- **Files:** `prisma/schema.prisma` (add `LeaveType`, `LeaveRequestStatus`
+  enums + `LeaveRequest` model).
+- **Check:** `npx prisma validate` passes. `npx prisma db push` creates the
+  table. `sqlite3 <file> ".schema LeaveRequest"` shows every column from
+  design §1, FKs to `User`, and a default of `PENDING_SUPERVISOR`; a
+  hand-insert with a bogus status is refused by Prisma (try via
+  `npx tsx`). No app code changes; the app still runs.
+- **Trace:** design §1, §5; brief §7.2 (Leave requests, Leave types,
+  §5.2 statuses); requirements U11.
+
+## Task 10 – Leave rules library *(High)* — **Done**
+
+> One auditable place for the rules, tested before any UI can get them
+> wrong (same pattern as login Task 4).
+
+- **Goal:** `src/lib/leave.ts` holds the pure rules: `daysInclusive`,
+  the text-limit validators (3–500 / 3–100, trimmed), the LR-3 transition
+  table, `allowedActions(user, request)`, and the LR-8 scoped queries.
+- **Files:** `src/lib/leave.ts`.
+- **Check:** Throwaway `npx tsx` script (delete afterwards): 1–5 Dec → 5
+  days, 4–4 Dec → 1 day, 9–5 Dec → refused; `""` remark → invalid,
+  `"  ok  "` → invalid (too short), 501 chars → invalid, 500 → valid;
+  `PENDING_SUPERVISOR → PENDING_HR` → refused, `SIGNED → PENDING_HR` by
+  the owning employee → allowed, `SIGNED → PENDING_HR` by someone else →
+  refused; terminal statuses → no actions for anyone.
+- **Trace:** design LR-3, LR-5, LR-6, LR-8, LR-9, §5; requirements U13,
+  U19, U21 (library side of AC-21/AC-23).
+
+## Task 11 – Request form + submit action *(High)* — **Done**
+
+- **Goal:** An employee fills the form (type — Other reveals the
+  description box —, dates with live "N days", division supervisor
+  dropdown) and submits; the server validates everything and stores a
+  `PENDING_SUPERVISOR` row.
+- **Files:** `src/app/employee/new/page.tsx`,
+  `src/components/RequestForm.tsx`, `src/app/leave/actions.ts`
+  (`submitRequest`), AppShell notice entry `request-submitted`.
+- **Check:** As `employee-1@`, `/employee/new`: the supervisor dropdown
+  lists exactly Supervisor 1 and Supervisor 2 (AC-10); Other with blank
+  description → blocked with the value kept, "Moving house" → submits
+  (AC-11); end before start → refused; 1–5 Dec shows "5 days" (AC-12).
+  `sqlite3` shows the new row with the right fields and `submittedAt`.
+  Pressing Submit asks "Are you sure?"; cancel → nothing stored; confirm
+  → green `request-submitted` banner (first taste of AC-20). Direct URL
+  to the page as another role → bounced. A forged POST (bad supervisorId,
+  other role) → refused server-side.
+- **Trace:** requirements U11, U12, U13, U21, AC-10/11/12; design §1,
+  LR-1, LR-2, LR-5, LR-6, LR-10, §4, §5.
+
+## Task 12 – Request detail page (read-only, gated) *(High)* — **Done**
+
+> Shared by all four roles, and the **only** screen that will ever hold
+> action buttons — so it is built and gated before any action exists.
+> `DecisionButton` (confirm + POST) and the `AppShell` success-notice map
+> land here; Task 13's Send to HR is their first real use.
+
+- **Goal:** `/requests/[id]` renders one request read-only (all fields,
+  both remarks, submitted/signed/decided dates) for exactly the viewers
+  LR-8 allows; the action area is empty until Tasks 13–15.
+- **Files:** `src/app/requests/[id]/page.tsx`,
+  `src/components/DecisionButton.tsx`, `src/components/AppShell.tsx`
+  (notice map).
+- **Check:** Employee opens own id → full detail, remarks and all three
+  dates visible; Supervisor 2 opens a row naming Supervisor 1 (hand-typed
+  URL) → bounced home with the not-authorized banner, no content
+  (AC-22 page half); HR opens a supervisor-rejected row → bounced
+  (AC-18's rule); unknown id → "not found". A button hunt across all six
+  statuses finds no Edit / Delete / Reopen — and, being not yet wired, no
+  action buttons at all (AC-21).
+- **Trace:** requirements U19, U20, AC-21/22; design LR-3, LR-4, LR-8,
+  LR-10, §4 (rows link here; only actions live here), §5, §6 bullets 2–3.
+
+## Task 13 – Employee home + Send to HR *(High)* — **Done**
+
+- **Goal:** The placeholder `/employee` becomes the real page: New request
+  button, *To act on* = own Signed requests (oldest first), *History* =
+  the rest (newest first), rows linking to the detail page; the detail
+  page's action area gains **Send to HR** for the owning employee — the
+  first real `DecisionButton` and the first full proof of the LR-10
+  pattern.
+- **Files:** `src/app/employee/page.tsx`,
+  `src/components/RequestList.tsx`, `src/components/StatusBadge.tsx`,
+  `src/app/leave/actions.ts` (`sendToHr`), notice `request-sent`,
+  `src/app/requests/[id]/page.tsx` (action area).
+- **Check:** Submitting shows the request in History as Pending supervisor.
+  AC-19: hand a row to another user —
+  `UPDATE LeaveRequest SET employeeId=<another user id>` in SQLite — the
+  row vanishes from `/employee`; restore it. Until Task 14 exists, flip a
+  row with `sqlite3 <file> "UPDATE LeaveRequest SET status='SIGNED' WHERE id=…"`:
+  it appears under To act on (oldest-first order holds); opening it shows
+  Send to HR, pressing → confirm, then green banner and Pending HR, gone
+  from To act on (AC-15 + AC-20's first full pass). Detail pages of every
+  other status show no button; a forged send POST on an unsigned row →
+  refused.
+- **Trace:** requirements U15, U17, U18, AC-15/19/20; design LR-3, LR-4,
+  LR-8, LR-9, LR-10, §4, §5.
+
+## Task 14 – Supervisor home + Sign / Reject *(High)* — **Done**
+
+- **Goal:** `/supervisor` lists the queue and history for requests naming
+  the signed-in supervisor; the detail page now offers Sign and
+  Reject(remark) to the named supervisor at Pending supervisor, through
+  the LR-10 pattern.
+- **Files:** `src/app/supervisor/page.tsx`, `src/app/requests/[id]/page.tsx`
+  (action area), `src/app/leave/actions.ts` (`supervisorSign`,
+  `supervisorReject`), notices `request-signed`, `request-rejected`.
+- **Check:** Two requests, one naming Supervisor 1 and one Supervisor 2 →
+  each queue shows exactly its own, oldest first; History newest first
+  (AC-17). Sign → confirm, success banner, status Signed, `signedAt`
+  set, disappears from the queue (AC-13). Reject with blank remark →
+  blocked, typed remark kept; with remark → Rejected by supervisor and
+  the employee's History shows the remark; nothing can undo it (AC-14).
+  Supervisor 2 POSTs to the sign action on Supervisor 1's id → refused.
+- **Trace:** requirements U14, U17, U18, U19, AC-13/14/17/20; design
+  LR-3, LR-4, LR-5, LR-9, LR-10, §4, §5.
+
+## Task 15 – HR queue + Approve / Reject + officer recorded *(High)* — **Done**
+
+- **Goal:** `/hr` shows the shared queue and HR history; the detail page
+  offers Approve and Reject(remark) to any HR officer at Pending HR; the
+  deciding officer and time are stamped server-side.
+- **Files:** `src/app/hr/page.tsx`, `src/app/requests/[id]/page.tsx`
+  (action area), `src/app/leave/actions.ts` (`hrApprove`, `hrReject`),
+  notice `request-approved`.
+- **Check:** Both `hr-1@` and `hr-2@` see the same queue, oldest first
+  (AC-18). `hr-2@` approves → Approved, "HR 2" recorded with `decidedAt`
+  (AC-16); `hr-1@` rejects another with a remark — blank remark blocked,
+  remark required, "HR 1" recorded (AC-16). A supervisor-rejected request
+  appears nowhere in HR's pages (AC-18). Employee POSTs to `hrApprove` →
+  refused.
+- **Trace:** requirements U16, U17, AC-16/18; design LR-3, LR-4, LR-5,
+  LR-8, LR-9, LR-10, §4, §5.
+
+## Task 16 – Admin: every record, read-only *(Medium)* — **Done**
+
+- **Goal:** `/admin` lists every leave record — including supervisor
+  rejections HR never saw — with no way to change anything (FR-08).
+- **Files:** `src/app/admin/page.tsx` (reuses `RequestList` /
+  `StatusBadge`).
+- **Check:** After the flow above: the admin table contains all requests
+  from every employee, newest first, remarks and officer visible,
+  including Rejected-by-supervisor rows (AC-24). Zero buttons; typed
+  action URLs from an admin session → refused (LR-1/LR-3). Admin sees
+  requests an employee or supervisor cannot see — the point of the
+  module.
+- **Trace:** requirements U22, AC-24; design LR-8, §4, §5; brief FR-08.
+
+## Task 17 – Tampering and cross-role pass *(High)* — **Done**
+
+- **Goal:** The security claims (§6 of the design, FR-10/§7.5) are proven
+  by breaking attempts, not assumed.
+- **Files:** none expected — fixes go to the spec first, then the code.
+- **Check:** With devtools and `npx tsx` forged POSTs: employee →
+  `hrApprove` / `supervisorSign` on a row not naming them → refused;
+  supervisor → `submitRequest` → refused; anonymous (no cookie) → refused
+  (AC-22). Forge field abuse: end < start, blank required remark,
+  501-char remark, `OTHER` without description, bogus status value →
+  all refused (AC-23). Remark
+  `<script>alert(1)</script>` stored via a legal rejection → renders as
+  literal text (AC-23). `npm run lint` and `npm run build` pass.
+- **Trace:** requirements U20, U21, AC-22/23; design LR-1…LR-6, §6;
+  brief §7.5 / OWASP A01, A03, A05.
+
+## Task 18 – Full acceptance run against the leave requirements *(High)* — **Done**
+
+- **Goal:** The module is verified as a whole, in the order the brief's
+  flow happens, and left clean.
+- **Files:** none expected — fixes go to the spec first, then the code.
+- **Check:** Walk AC-10 … AC-24 of the requirements' leave §4 by hand:
+  the happy path (Employee 1 → Supervisor 1 signs → Send → `hr-2`
+  approves, officer recorded) and both rejection paths (supervisor
+  rejects with remark; HR rejects with remark), confirmations and
+  success banners on all six action buttons (AC-20), all six statuses
+  button-hunted for edit/undo paths (AC-21), then `npm run lint` +
+  `npm run build` clean. Tick the Status column of every check.
+- **Trace:** requirements §4 (all leave ACs); design §2–§6; brief §5.1
+  workflow and §7.5.
+
+---
+
+**After each task:** same rule as login — the AI reports what passed,
+waits for your OK, then commits (`feat: …`), one commit per finished
+task, only when you say go.
