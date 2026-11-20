@@ -104,6 +104,61 @@ Server actions (no new routes): `login` — verifies credentials, sets the
 cookie, redirects to the role's home; `logout` — clears the cookie,
 redirects to `/login`.
 
+### Visual style (all screens)
+
+Agreed 20/11/26 from the mock-up in `images/login.webp` (visual reference
+only — see the exclusions at the end). Behaviour is unchanged; this is how
+the screens look.
+
+**Palette** (custom Tailwind theme tokens in `src/app/globals.css`):
+
+| Token | Value | Used for |
+|-------|-------|----------|
+| `navy-950` | `#161F4B` | Page background behind the card |
+| `navy-900` | `#1E2A5E` | Primary: LOGIN/Sign-out buttons, home header strip, avatar circle, wordmark |
+| `navy-800` | `#2A3A78` | Button and chip hover |
+| `steel-400` | `#6C88B8` | Mid-tone of the wave gradient |
+| `cream-300` | `#F4D9A4` | Warm accent of the wave gradient |
+| white | `#FFFFFF` | Card surface, button text, right-panel heading |
+| `gray-200` | `#E4E7EC` | Input borders, hairlines |
+| `gray-400` | `#98A2B3` | Placeholders, decorative dots |
+| `gray-500` | `#667085` | Body text on white |
+| yellow / red tints | existing Tailwind | Not-authorized banner / login error (unchanged) |
+
+**Layout.**
+
+1. **Page**: `navy-950` fills the viewport; every screen is one large
+   white card centred on it, `rounded-3xl` (24 px), with a deep soft
+   shadow.
+2. **Login card**: `max-w-5xl`, split panel — left ≈ 42 % white, right
+   ≈ 58 % wave gradient (`navy-900 → steel-400 → cream-300`, diagonal
+   CSS gradient standing in for the stock wave art, which stays out for
+   licensing). The gradient panel hides below `md`.
+3. **Login left panel** (padding 32–40 px, stack gap 24 px, column
+   ≈ 260 px wide, centred): wordmark top-left (navy rounded-square mark +
+   "Budiman HRMS", 600 weight); avatar circle (navy, white person icon,
+   64 px); two pill inputs (`rounded-full`, 44 px tall, `gray-200` border,
+   person/lock icon inset left, uppercase `gray-400` placeholder, labels
+   kept screen-reader-only); one full-width navy pill button, white
+   uppercase `LOGIN` label with letter-spacing; three `gray-400` dots at
+   the bottom, centred.
+4. **Login right panel**: the "Welcome." heading (white, bold, ≈ text-5xl)
+   near the bottom left, one grey-white caption line under it. No nav
+   links.
+5. **Home screens**: same navy page and white card; the card's top is a
+   `navy-900` header strip (≈ 56 px, white text) — wordmark left, on the
+   right a translucent name·role chip and a translucent pill **Sign out**
+   button (white border/text, `navy-800` hover). Below the strip, the page
+   content sits in the white area with 32 px padding.
+6. **Rhythm**: 24 px gaps between stacked controls; 32 px card padding on
+   the home card; inputs and buttons are always pill-shaped.
+
+**Excluded from the mock on purpose** (approved 20/11/26): the "Remember
+me" checkbox and "Forgot your password?" link (requirements §5; interview
+A2/A3), the mock's placeholder nav links, the "Template Design" wordmark
+(replaced by "Budiman HRMS"), and the stock wave image itself (recreated
+in CSS — the JPEG is licensed stock art, not ours to ship).
+
 ## 5. Where the code lives
 
 | Folder / file | What's in it |

@@ -57,15 +57,15 @@ shared password `password123` are the ones in brief §7.2:
 
 | Status | ID | Check | How to test |
 |--------|----|-------|-------------|
-| To do | AC-01 | Correct email + password logs in and opens that role's home page (U1, U2) | • Go to `/login`<br>• Sign in as `employee-1@budiman.com` / `password123`<br>• You should land on `/employee` |
-| To do | AC-02 | Every role lands on its own home page (U2) | • Sign in as each of the six demo accounts in turn<br>• `supervisor-1@` and `supervisor-2@` → `/supervisor`<br>• `hr-1@` and `hr-2@` → `/hr`<br>• `admin@` → `/admin`<br>• Each should see its own home page, no errors |
-| To do | AC-03 | Wrong credentials give one identical generic message; no lockout (U3) | • Try `employee-1@budiman.com` / `wrongpass` → "Invalid email or password"<br>• Try `nosuch@budiman.com` / `password123` → the exact same message<br>• Repeat 5 times → still allowed to try; no lockout message |
-| To do | AC-04 | Logged-out visitors can reach no page but `/login` (U5) | • With no session (private window), open `/employee`, `/supervisor`, `/hr`, `/admin`<br>• Each should redirect to `/login` with no data shown |
-| To do | AC-05 | A role cannot open another role's pages — even by typing the URL (U4) | • Sign in as `employee-1@budiman.com`<br>• Type `/admin` in the address bar<br>• You should land back on `/employee` with a "not authorized" notice, and never see admin content |
-| To do | AC-06 | Logout ends the session (U6) | • Sign in as `hr-1@budiman.com`<br>• Click **Sign out** → you should be at `/login`<br>• Press the browser Back button or reload `/hr` → you should be redirected to `/login` |
-| To do | AC-07 | The six demo accounts exist after seeding, with hashed passwords (U7, U10) | • Run the seed command<br>• Open the SQLite file (e.g. `sqlite3` → `SELECT email, password FROM User;`)<br>• You should see the six §7.2 emails, and each password value starts with `$2b$` (a bcrypt hash), never `password123` |
-| To do | AC-08 | Email is trimmed and case-insensitive (U8) | • Sign in as ` Employee-1@Budiman.com ` (extra spaces and capitals)<br>• You should land on `/employee` |
-| To do | AC-09 | Sessions expire after 12 hours (U9) | • Sign in, then move the system clock forward ~13 hours (or set the cookie's expiry in devtools to the past)<br>• Reload `/employee` → you should be redirected to `/login` |
+| Done | AC-01 | Correct email + password logs in and opens that role's home page (U1, U2) | • Go to `/login`<br>• Sign in as `employee-1@budiman.com` / `password123`<br>• You should land on `/employee` |
+| Done | AC-02 | Every role lands on its own home page (U2) | • Sign in as each of the six demo accounts in turn<br>• `supervisor-1@` and `supervisor-2@` → `/supervisor`<br>• `hr-1@` and `hr-2@` → `/hr`<br>• `admin@` → `/admin`<br>• Each should see its own home page, no errors |
+| Done | AC-03 | Wrong credentials give one identical generic message; no lockout (U3) | • Try `employee-1@budiman.com` / `wrongpass` → "Invalid email or password"<br>• Try `nosuch@budiman.com` / `password123` → the exact same message<br>• Repeat 5 times → still allowed to try; no lockout message |
+| Done | AC-04 | Logged-out visitors can reach no page but `/login` (U5) | • With no session (private window), open `/employee`, `/supervisor`, `/hr`, `/admin`<br>• Each should redirect to `/login` with no data shown |
+| Done | AC-05 | A role cannot open another role's pages — even by typing the URL (U4) | • Sign in as `employee-1@budiman.com`<br>• Type `/admin` in the address bar<br>• You should land back on `/employee` with a "not authorized" notice, and never see admin content |
+| Done | AC-06 | Logout ends the session (U6) | • Sign in as `hr-1@budiman.com`<br>• Click **Sign out** → you should be at `/login`<br>• Press the browser Back button or reload `/hr` → you should be redirected to `/login` |
+| Done | AC-07 | The six demo accounts exist after seeding, with hashed passwords (U7, U10) | • Run the seed command<br>• Open the SQLite file (e.g. `sqlite3` → `SELECT email, password FROM User;`)<br>• You should see the six §7.2 emails, and each password value starts with `$2b$` (a bcrypt hash), never `password123` |
+| Done | AC-08 | Email is trimmed and case-insensitive (U8) | • Sign in as ` Employee-1@Budiman.com ` (extra spaces and capitals)<br>• You should land on `/employee` |
+| Done | AC-09 | Sessions expire after 12 hours (U9) | • Sign in, then move the system clock forward ~13 hours (or set the cookie's expiry in devtools to the past)<br>• Reload `/employee` → you should be redirected to `/login` |
 
 ## 5. Not included (for now)
 

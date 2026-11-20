@@ -18,18 +18,18 @@ Medium story U9.
 
 | Status | # | Task | Priority | Checks (from requirements §4) |
 |--------|---|------|----------|-------------------------------|
-| To do | 1 | Project setup for Prisma and the seed | High | — (enables AC-07) |
-| To do | 2 | Users table | High | AC-07 (schema half) |
-| To do | 3 | Seed the six demo users | High | AC-07 |
-| To do | 4 | Session cookie library | High | AC-09 (library half) |
-| To do | 5 | Login page | High | — (part of AC-01) |
-| To do | 6 | Role home pages, gates and sign-out | High | AC-04, AC-05, AC-06 |
-| To do | 7 | Login action: real sign-in | High | AC-01, AC-02, AC-03, AC-08 |
-| To do | 8 | Full acceptance run against the requirements | High | AC-01…AC-09 |
+| Done | 1 | Project setup for Prisma and the seed | High | — (enables AC-07) |
+| Done | 2 | Users table | High | AC-07 (schema half) |
+| Done | 3 | Seed the six demo users | High | AC-07 |
+| Done | 4 | Session cookie library | High | AC-09 (library half) |
+| Done | 5 | Login page | High | — (part of AC-01) |
+| Done | 6 | Role home pages, gates and sign-out | High | AC-04, AC-05, AC-06 |
+| Done | 7 | Login action: real sign-in | High | AC-01, AC-02, AC-03, AC-08 |
+| Done | 8 | Full acceptance run against the requirements | High | AC-01…AC-09 |
 
 ---
 
-## Task 1 – Project setup for Prisma and the seed *(High)*
+## Task 1 – Project setup for Prisma and the seed *(High)* — **Done**
 
 > Database first, as agreed: this task creates the wiring, not the table.
 
@@ -47,7 +47,7 @@ Medium story U9.
 - **Trace:** design §3 (fixed stack), §5 (file list), §7 (commands);
   interview A3 (12-hour session ⇒ `SESSION_SECRET`).
 
-## Task 2 – Users table *(High)*
+## Task 2 – Users table *(High)* — **Done**
 
 - **Goal:** The `User` table from design §1 exists in a real SQLite file.
 - **Files:** `prisma/schema.prisma` (add `Role` enum + `User` model),
@@ -58,7 +58,7 @@ Medium story U9.
   restricted to the four values.
 - **Trace:** design §1 (`User`), §5; requirements U1, U10; brief §7.2.
 
-## Task 3 – Seed the six demo users *(High)*
+## Task 3 – Seed the six demo users *(High)* — **Done**
 
 - **Goal:** One command loads the six people from brief §7.2 with hashed
   passwords; re-running it never duplicates anyone.
@@ -70,7 +70,7 @@ Medium story U9.
 - **Trace:** requirements U7, U10, AC-07; design §2 rule 11, Reference B;
   brief §7.2.
 
-## Task 4 – Session cookie library *(High)*
+## Task 4 – Session cookie library *(High)* — **Done**
 
 - **Goal:** A tested library can create, verify and clear the signed
   `hrms_session` cookie — signature, `exp`, 12-hour lifetime — with no UI
@@ -85,7 +85,7 @@ Medium story U9.
 - **Trace:** requirements U9, AC-09 (library side); design §2 rules 6–9,
   §5 (`session.ts`); interview A3.
 
-## Task 5 – Login page *(High)*
+## Task 5 – Login page *(High)* — **Done**
 
 - **Goal:** `/login` shows the email + password form with the app name, the
   error notice area, and nothing else — no sign-up, no reset links.
@@ -98,7 +98,7 @@ Medium story U9.
 - **Trace:** requirements U1 (screen), U3 (notice area); design §4
   (`/login`), §5; interview A1.
 
-## Task 6 – Role home pages, gates and sign-out *(High)*
+## Task 6 – Role home pages, gates and sign-out *(High)* — **Done**
 
 - **Goal:** The four role homes, the `AppShell`, the server-side gates
   (`requireUser` / `requireRole`), the root redirect and the logout action
@@ -117,7 +117,7 @@ Medium story U9.
 - **Trace:** requirements U4, U5, U6, AC-04/05/06; design §2 rules 4–5, 10,
   12, §4, §5, §6 first bullet; interview A4–A6.
 
-## Task 7 – Login action: real sign-in *(High)*
+## Task 7 – Login action: real sign-in *(High)* — **Done**
 
 - **Goal:** Signing in with a demo account works end to end: credentials are
   checked against the database, the signed cookie is set, and each role lands
@@ -133,7 +133,7 @@ Medium story U9.
 - **Trace:** requirements U1, U2, U3, U8, AC-01/02/03/08; design §2 rules
   1–3, §5 (`login/actions.ts`); interview A1–A2, A7.
 
-## Task 8 – Full acceptance run against the requirements *(High)*
+## Task 8 – Full acceptance run against the requirements *(High)* — **Done**
 
 - **Goal:** The module is verified as a whole and left clean.
 - **Files:** none expected — fixes go to the spec first, then the code.
